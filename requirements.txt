@@ -1,3 +1,5 @@
 selenium
-webdriver-manager
+pandas
+requests
 openpyxl
+webdriver-manager

@@ -1,16 +1,13 @@
-pip install selenium pandas openpyxl requests webdriver-manager
-
-
-
-touch test_script.py
-nano test_script.py
-
-
-
-
+import os
+import openpyxl
 
 def write_report(test_case, result, comments, page_url):
-    file_name = "test_results.xlsx"
+    file_name = "data/test_results.xlsx"
+    directory = os.path.dirname(file_name)
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     if os.path.exists(file_name):
         workbook = openpyxl.load_workbook(file_name)
@@ -23,10 +20,7 @@ def write_report(test_case, result, comments, page_url):
 
     # Create a new sheet for the test case
     sheet = workbook.create_sheet(title=test_case)
-    # Write headers for the sheet
     sheet.append(["Page URL", "Test Case", "Result", "Comments"])
-
-    # Write the current result
     sheet.append([page_url, test_case, result, comments])
 
     # Save the workbook
