@@ -1,56 +1,65 @@
-# tests/test_scrape.py
+import time
 import sys
 import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Add the project root directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from config.settings import BASE_URL
-from utils.report import write_report
+from selenium.webdriver.common.by import By
 from utils.browser import get_driver
-import traceback
+from utils.report import write_report  # Assuming this function writes to Excel
+from config.settings import BASE_URL
 
-class ScrapeTester:
+class TestScrapeData:
     def __init__(self):
         self.driver = get_driver()
-        
-    def scrape_and_record_data(self):
+
+    def run_scrape_test(self):
+        """
+        Scrape data from the page (BASE_URL) and check for the required elements.
+        """
+        self.driver.get(BASE_URL)
+        time.sleep(2)  # Wait for the page to load completely
+
+        test_case = "Scrape Data Test"
         try:
-            # Navigate to the base URL
-            self.driver.get(BASE_URL)
-            
-            # Scrape dynamic data from the web page
-            site_name = self.driver.title  # Get the site name from the page title
-            browser = self.driver.capabilities['browserName']  # Get the browser name
+            # Extract the script data from the page
+            script_data = self.driver.execute_script("return window.ScriptData;")
+            #print("Script Data:", script_data)  # Debug: Log the entire script data
 
-            # Extracting data dynamically from the page
-            # Example: Assuming the data is embedded in a script tag or visible in HTML
-            country_code = self.driver.execute_script("""
-                return document.querySelector('meta[name="country-code"]')?.getAttribute('content') 
-                || 'Unknown';
-            """)  # Replace with actual scraping logic for country code
+            # Extract required data from the script data
+            site_url = script_data.get('config', {}).get('SiteUrl', '')
+            site_name = script_data.get('config', {}).get('SiteName', '')
+            campaign_id = script_data.get('pageData', {}).get('CampaignId', '')
+            country_code = script_data.get('userInfo', {}).get('CountryCode', '')
+            ip = script_data.get('userInfo', {}).get('IP', '')
 
-            ip = self.driver.execute_script("""
-                return document.querySelector('meta[name="ip-address"]')?.getAttribute('content') 
-                || 'Unknown';
-            """)  # Replace with actual logic or elements containing the IP
+            # Prepare the data for the report
+            browser = self.driver.capabilities['browserName']
+            result = "Pass"  # This is the result status
+            result_message = (
+                f"Successfully scraped data: "
+                f"SiteName: {site_name}, CampaignID: {campaign_id}, CountryCode: {country_code}, IP: {ip}"
+            )
 
-            campaign_id = self.driver.execute_script("""
-                return document.querySelector('script[data-campaign-id]')?.getAttribute('data-campaign-id') 
-                || 'Unknown';
-            """)  # Replace with logic to scrape the campaign ID
+            # Log the result to Excel using the write_report function
+            write_report(test_case, result, result_message, site_url, site_name, campaign_id, browser, country_code, ip)
 
-            # Write the data to an Excel file
-            write_report(BASE_URL, campaign_id, site_name, browser, country_code, ip, "Scrape data test case", "Pass")
-
+            print(f"Test passed: Data scraped successfully from {BASE_URL}.")
         except Exception as e:
-            # Write to report in case of failure
-            error_message = f"Fail: {traceback.format_exc()}"
-            write_report(BASE_URL, "N/A", "N/A", "N/A", "N/A", "N/A", "Scrape data test case", error_message)
+            # If any error occurs, record a failure
+            result = "Fail"  # Test failed
+            result_message = f"Error while scraping data: {str(e)}"
+            write_report(test_case, result, result_message, '', '', '', '', '', '')  # Empty values for failed test
 
-        finally:
-            self.driver.quit()
+            print(f"Test failed: {result_message}")
+
+    def close_driver(self):
+        self.driver.quit()
 
 
 if __name__ == "__main__":
-    tester = ScrapeTester()
-    tester.scrape_and_record_data()
+    tester = TestScrapeData()
+    
+    try:
+        tester.run_scrape_test()  # Run the scrape test
+    finally:
+        tester.close_driver()

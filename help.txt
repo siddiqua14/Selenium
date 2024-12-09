@@ -5,7 +5,8 @@ pip install selenium pandas openpyxl requests webdriver-manager
 touch test_script.py
 nano test_script.py
 
-
+python -m venv .venv
+source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
 
 
 

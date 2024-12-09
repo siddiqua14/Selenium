@@ -1,6 +1,7 @@
 import time
 import sys
 import os
+from urllib.parse import urljoin  # This helps in joining relative URLs with the base URL
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import requests
@@ -24,21 +25,36 @@ class TestURLStatusCode:
         test_case = "URL status code test"
         try:
             links = self.driver.find_elements(By.TAG_NAME, 'a')  # Find all anchor tags
+                        # Use a set to store unique URLs
+            unique_links = set()
+
+            # Loop through each link and add the href to the set
+            for link in links:
+                href = link.get_attribute('href')
+                if href:  # Ensure the link has a valid href
+                    unique_links.add(href)
+
+            # Print the total number of unique links
+            print(f"Total unique links on this page: {len(unique_links)}")
+
             broken_links_count = 0
             comments = []
 
             for link in links:
                 href = link.get_attribute('href')
                 if href:  # Ensure href attribute is not None or empty
+                    # Resolve relative URLs using BASE_URL
+                    full_url = urljoin(BASE_URL, href)
+
                     try:
-                        response = requests.head(href, timeout=5)  # Perform a HEAD request
+                        response = requests.head(full_url, timeout=5)  # Perform a HEAD request
                         if response.status_code == 404:  # Check for broken link
                             broken_links_count += 1
-                            comments.append(f"Broken link: {href}")
+                            comments.append(f"Broken link: {full_url}")
                     except requests.RequestException as e:
                         # Handle request errors
                         broken_links_count += 1
-                        comments.append(f"Error accessing {href}: {str(e)}")
+                        comments.append(f"Error accessing {full_url}: {str(e)}")
 
             if broken_links_count > 0:
                 result = "Fail"

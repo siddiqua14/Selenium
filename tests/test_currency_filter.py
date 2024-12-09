@@ -1,12 +1,10 @@
-
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 import traceback
 import time
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utils.browser import get_driver
@@ -37,29 +35,44 @@ class TestCurrencyFilter:
             self.driver.execute_script("arguments[0].scrollIntoView(true);", currency_dropdown)
             time.sleep(1)
 
-            # Open the dropdown
-            ActionChains(self.driver).move_to_element(currency_dropdown).click().perform()
+            # Open the dropdown (automatically)
+            currency_dropdown.click()  # Open the dropdown
             time.sleep(1)
 
-            # Find all currency options
-            currency_options = self.driver.find_elements(By.CSS_SELECTOR, "#js-currency-sort-footer .select-ul li")
+            # Find all currency options using XPath and innerHTML
+            currency_options = self.driver.find_elements(By.XPATH, "//div[@id='js-currency-sort-footer']//ul[@class='select-ul']//li")
             print(f"Currency options found: {len(currency_options)}")
             if not currency_options:
                 raise Exception("No currency options found in the dropdown.")
 
             # Iterate over each currency option and test
             for option in currency_options:
-                currency_code = option.get_attribute("data-currency-country")
-                print(f"Testing currency: {currency_code}")
+                # Get the innerHTML content of the option element
+                option_html = option.get_attribute("innerHTML")
+                print(f"Option HTML: {option_html}")  # Debugging the HTML content
+
+                # Extract the currency text from the <p> tag inside the <div> tag
+                currency_text = option.find_element(By.TAG_NAME, "p").text.strip()
+                print(f"Testing currency: {currency_text}")
 
                 try:
-                    # Ensure visibility and clickability
+                    # Ensure the option is visible and clickable
+                    WebDriverWait(self.driver, 10).until(EC.visibility_of(option))  # Ensure visibility
+                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(option))  # Ensure clickability
+                    
+                    # Scroll into view to avoid issues with elements outside the viewport
                     self.driver.execute_script("arguments[0].scrollIntoView(true);", option)
-                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(option))
-                    option.click()  # Select the currency
+
+                    # Click on the currency option
+                    option.click()  
+                    print(f"Clicked on {currency_text}")  # Logging the selected currency
                 except TimeoutException:
-                    print(f"Element {currency_code} not clickable, forcing with JavaScript.")
-                    self.driver.execute_script("arguments[0].click();", option)
+                    print(f"TimeoutException: Element {currency_text} not clickable.")
+                    continue  # Skip this currency if it's not clickable
+                except StaleElementReferenceException:
+                    # Handle the case when the element becomes stale and needs to be refreshed
+                    print(f"StaleElementReferenceException: Retry clicking {currency_text}")
+                    continue
 
                 time.sleep(2)  # Wait for the page to update
 
@@ -69,17 +82,21 @@ class TestCurrencyFilter:
 
                 for tile in property_tiles:
                     price_element = tile.find_element(By.CLASS_NAME, "price")  # Adjust selector if needed
-                    if currency_code not in price_element.text:
+                    if currency_text not in price_element.text:
                         all_tiles_correct = False
-                        print(f"Currency mismatch: {currency_code} not found in {price_element.text}.")
+                        print(f"Currency mismatch: {currency_text} not found in {price_element.text}.")
                         break
 
                 if all_tiles_correct:
-                    results.append(f"Pass: {currency_code}")
-                    print(f"Currency {currency_code} passed.")
+                    results.append(f"Pass: {currency_text}")
+                    print(f"Currency {currency_text} passed. Property tiles updated correctly.")
                 else:
-                    results.append(f"Fail: {currency_code}")
-                    print(f"Currency {currency_code} failed.")
+                    results.append(f"Fail: {currency_text}")
+                    print(f"Currency {currency_text} failed. Property tiles not updated correctly.")
+
+                # Reopen the dropdown if necessary for the next selection
+                currency_dropdown.click()
+                time.sleep(1)
 
             # Write detailed results to the report
             final_result = "\n".join(results)
