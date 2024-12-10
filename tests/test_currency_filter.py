@@ -49,7 +49,7 @@ class TestCurrencyFilter:
             for option in currency_options:
                 # Get the innerHTML content of the option element
                 option_html = option.get_attribute("innerHTML")
-                print(f"Option HTML: {option_html}")  # Debugging the HTML content
+                #print(f"Option HTML: {option_html}")  # Debugging the HTML content
 
                 # Extract the currency text from the <p> tag inside the <div> tag
                 currency_text = option.find_element(By.TAG_NAME, "p").text.strip()
