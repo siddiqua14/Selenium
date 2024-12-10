@@ -23,11 +23,14 @@ class TestH1Tags:
         try:
             # Check if an H1 tag exists
             self.driver.find_element(By.TAG_NAME, 'h1')
-            write_report(test_case, "Pass", "H1 tag found.", BASE_URL)
+            # Create a result dictionary for the H1 tag test
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": "Pass", "Comments": "H1 tag found."}]
+            write_report(test_case, BASE_URL, results)  # Pass results as a list of dictionaries
             print(f"Test passed: H1 tag exists on {BASE_URL}.")
         except:
             # If no H1 tag is found, record a failure
-            write_report(test_case, "Fail", "H1 tag missing.", BASE_URL)
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": "Fail", "Comments": "H1 tag missing."}]
+            write_report(test_case, BASE_URL, results)  # Pass results as a list of dictionaries
             print(f"Test failed: H1 tag missing on {BASE_URL}.")
 
     def close_driver(self):

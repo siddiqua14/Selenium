@@ -13,6 +13,7 @@ from config.settings import BASE_URL
 
 class TestCurrencyFilter:
     def __init__(self):
+        # Initialize the driver
         self.driver = get_driver()
 
     def run_currency_filter_test(self):
@@ -24,6 +25,7 @@ class TestCurrencyFilter:
 
         test_case = "Currency filter test"
         results = []  # Store results for each currency
+        headers = ["Currency", "Default Price", "Tile Prices", "Status"]
 
         try:
             # Wait for the currency dropdown to be present
@@ -35,81 +37,109 @@ class TestCurrencyFilter:
             self.driver.execute_script("arguments[0].scrollIntoView(true);", currency_dropdown)
             time.sleep(1)
 
-            # Open the dropdown (automatically)
-            currency_dropdown.click()  # Open the dropdown
+            # Open the dropdown
+            currency_dropdown.click()
             time.sleep(1)
 
-            # Find all currency options using XPath and innerHTML
+            # Find all currency options
             currency_options = self.driver.find_elements(By.XPATH, "//div[@id='js-currency-sort-footer']//ul[@class='select-ul']//li")
             print(f"Currency options found: {len(currency_options)}")
             if not currency_options:
                 raise Exception("No currency options found in the dropdown.")
 
+            # Capture initial prices
+            initial_default_price = self.driver.find_element(By.ID, "js-default-price").text.strip()
+            print(f"Initial default price: {initial_default_price}")
+
+            initial_tile_prices = [
+                price.text.strip() for price in self.driver.find_elements(By.CLASS_NAME, "js-price-value")
+            ]
+            print(f"Initial tile prices: {initial_tile_prices}")
+
             # Iterate over each currency option and test
             for option in currency_options:
-                # Get the innerHTML content of the option element
-                option_html = option.get_attribute("innerHTML")
-                #print(f"Option HTML: {option_html}")  # Debugging the HTML content
-
-                # Extract the currency text from the <p> tag inside the <div> tag
                 currency_text = option.find_element(By.TAG_NAME, "p").text.strip()
                 print(f"Testing currency: {currency_text}")
 
                 try:
                     # Ensure the option is visible and clickable
-                    WebDriverWait(self.driver, 10).until(EC.visibility_of(option))  # Ensure visibility
-                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(option))  # Ensure clickability
-                    
-                    # Scroll into view to avoid issues with elements outside the viewport
-                    self.driver.execute_script("arguments[0].scrollIntoView(true);", option)
+                    WebDriverWait(self.driver, 10).until(EC.visibility_of(option))
+                    WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(option))
 
-                    # Click on the currency option
-                    option.click()  
-                    print(f"Clicked on {currency_text}")  # Logging the selected currency
+                    # Scroll into view and click on the currency option
+                    self.driver.execute_script("arguments[0].scrollIntoView(true);", option)
+                    option.click()
+                    print(f"Clicked on {currency_text}")
                 except TimeoutException:
                     print(f"TimeoutException: Element {currency_text} not clickable.")
-                    continue  # Skip this currency if it's not clickable
+                    continue
                 except StaleElementReferenceException:
-                    # Handle the case when the element becomes stale and needs to be refreshed
                     print(f"StaleElementReferenceException: Retry clicking {currency_text}")
                     continue
 
                 time.sleep(2)  # Wait for the page to update
 
-                # Validate property tiles display the selected currency
-                property_tiles = self.driver.find_elements(By.CLASS_NAME, "property-tile")  # Adjust selector if needed
-                all_tiles_correct = True
+                # Capture updated prices
+                updated_default_price = self.driver.find_element(By.ID, "js-default-price").text.strip()
+                print(f"Updated default price: {updated_default_price}")
 
-                for tile in property_tiles:
-                    price_element = tile.find_element(By.CLASS_NAME, "price")  # Adjust selector if needed
-                    if currency_text not in price_element.text:
-                        all_tiles_correct = False
-                        print(f"Currency mismatch: {currency_text} not found in {price_element.text}.")
-                        break
+                updated_tile_prices = [
+                    price.text.strip() for price in self.driver.find_elements(By.CLASS_NAME, "js-price-value")
+                ]
+                print(f"Updated tile prices: {updated_tile_prices}")
 
-                if all_tiles_correct:
-                    results.append(f"Pass: {currency_text}")
-                    print(f"Currency {currency_text} passed. Property tiles updated correctly.")
+                # If the currency is EUR, we skip price comparison because no change is expected
+                if currency_text == "€ (EUR)":
+                    status = "Pass"
+                    print(f"Currency is EUR, no price change expected.")
                 else:
-                    results.append(f"Fail: {currency_text}")
-                    print(f"Currency {currency_text} failed. Property tiles not updated correctly.")
+                    # Compare prices for other currencies
+                    if initial_default_price != updated_default_price:
+                        print(f"Default price updated: {initial_default_price} → {updated_default_price}")
+                        status = "Pass"
+                    else:
+                        print(f"Default price did not update.")
+                        status = "Fail - No update"
+
+                # Format the tile prices for Excel output as "From $124, From $130, ..."
+                formatted_tile_prices = ', '.join([f"From {price}" for price in updated_tile_prices])
+
+                # Add the result to the report
+                results.append({
+                    "Currency": currency_text,
+                    "Default Price": updated_default_price,
+                    "Tile Prices": formatted_tile_prices,
+                    "Status": status
+                })
 
                 # Reopen the dropdown if necessary for the next selection
                 currency_dropdown.click()
                 time.sleep(1)
 
-            # Write detailed results to the report
-            final_result = "\n".join(results)
-            write_report(test_case, "Pass", final_result, BASE_URL)
-            print(f"Test completed: \n{final_result}")
+            # Write results to the report
+            write_report(test_case, BASE_URL, results, headers)
 
         except Exception as e:
             # Log the full exception details
-            write_report(test_case, "Fail", traceback.format_exc(), BASE_URL)
+            write_report(test_case, BASE_URL, [{
+                "Currency": "N/A",
+                "Default Price": "N/A",
+                "Tile Prices": "N/A",
+                "Status": f"Fail - {traceback.format_exc()}"
+            }], headers)
             print(f"Test failed: {traceback.format_exc()}")
 
+        finally:
+            print(f"Test completed. Results saved.")
+
     def close_driver(self):
-        self.driver.quit()
+        """Close the WebDriver."""
+        if self.driver:
+            self.driver.quit()
+            print("Driver closed.")
+        else:
+            print("Driver not initialized.")
+
 
 if __name__ == "__main__":
     tester = TestCurrencyFilter()

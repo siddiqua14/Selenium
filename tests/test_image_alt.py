@@ -8,7 +8,6 @@ from utils.browser import get_driver
 from utils.excel_report import write_report
 from config.settings import BASE_URL
 
-
 class TestImageAltAttribute:
     def __init__(self):
         self.driver = get_driver()
@@ -26,6 +25,7 @@ class TestImageAltAttribute:
             images = self.driver.find_elements(By.TAG_NAME, 'img')
             missing_alt_count = 0
 
+            # Count images missing alt attribute
             for img in images:
                 alt_attribute = img.get_attribute('alt')
                 if not alt_attribute:  # Check if the `alt` attribute is missing or empty
@@ -38,13 +38,17 @@ class TestImageAltAttribute:
                 result = "Pass"
                 comments = "All images have `alt` attributes."
 
+            # Prepare the result as a list of dictionaries
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": result, "Comments": comments}]
+            
             # Write the result to the Excel report
-            write_report(test_case, result, comments, BASE_URL)
+            write_report(test_case, BASE_URL, results)  # Pass results as a list of dictionaries
             print(f"Test {result.lower()}: {comments}")
 
         except Exception as e:
             # Log unexpected errors in the report
-            write_report(test_case, "Error", str(e), BASE_URL)
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": "Error", "Comments": str(e)}]
+            write_report(test_case, BASE_URL, results)
             print(f"An error occurred: {e}")
 
     def close_driver(self):

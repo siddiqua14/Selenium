@@ -100,14 +100,13 @@ Copy code
 
 ### Test Results (`test_results.xlsx`)
 
-The test results are stored in an Excel file, with the following columns:
+The test results are stored in an Excel file in test name sheets, with the following columns:
 
 | **Page URL**                                   | **Test Case**             | **Pass/Fail** | **Comments**                                   |
 |------------------------------------------------|---------------------------|---------------|-----------------------------------------------|
 | https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097 | H1 Tag Existence Test      | Pass          | H1 tag found                                  |
 | https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097 | HTML tag sequence test       | Fail          | Missing tags: h5, h6         |
 | https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097 | Image Alt Attribute Test   | Pass          | All images have alt attributes                |
-| https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097 | Currency Filter Test       | Pass           | Property tiles updated correctly with all currencies: <br> Pass: $ (USD), Pass: $ (CAD), Pass: € (EUR), Pass: £ (GBP), Pass: $ (AUD), Pass: $ (SGD), Pass: ﷼ (AED), Pass: ৳ (BDT) |
 ---
 
 ## Scraped Data (`scraped_data_report.xlsx`)

@@ -36,6 +36,7 @@ class TestHTMLTagSequence:
                 except:
                     missing_tags.append(tag)
 
+            # Preparing the result as a dictionary list
             if missing_tags or broken_sequence:
                 result = "Fail"
                 comments = f"Missing tags: {', '.join(missing_tags)}"
@@ -45,11 +46,16 @@ class TestHTMLTagSequence:
                 result = "Pass"
                 comments = "All tags from H1 to H6 found in sequence."
 
-            write_report(test_case, result, comments, BASE_URL)
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": result, "Comments": comments}]
+            
+            # Write the result to the Excel report
+            write_report(test_case, BASE_URL, results)  # Passing the results as a list of dictionaries
             print(f"Test result for {BASE_URL}: {result} - {comments}")
 
         except Exception as e:
-            write_report(test_case, "Error", str(e), BASE_URL)
+            # Log unexpected errors in the report
+            results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": "Error", "Comments": str(e)}]
+            write_report(test_case, BASE_URL, results)
             print(f"Error running test: {e}")
 
     def close_driver(self):
