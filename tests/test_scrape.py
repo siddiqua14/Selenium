@@ -41,14 +41,14 @@ class TestScrapeData:
             )
 
             # Log the result to Excel using the write_report function
-            write_report(test_case, result, result_message, site_url, site_name, campaign_id, browser, country_code, ip)
+            write_report(site_url, site_name, campaign_id, browser, country_code, ip, result)
 
             print(f"Test passed: Data scraped successfully from {BASE_URL}.")
         except Exception as e:
             # If any error occurs, record a failure
             result = "Fail"  # Test failed
             result_message = f"Error while scraping data: {str(e)}"
-            write_report(test_case, result, result_message, '', '', '', '', '', '')  # Empty values for failed test
+            write_report('', '', '', '', '', '', result)  # Empty values for failed test
 
             print(f"Test failed: {result_message}")
 

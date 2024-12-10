@@ -1,7 +1,7 @@
 import os
 import openpyxl
 
-def write_report(test_case, result, result_message, site_url, site_name, campaign_id, browser, country_code, ip):
+def write_report(site_url, site_name, campaign_id, browser, country_code, ip, result):
     # Define the file name
     file_name = "data/scraped_data_report.xlsx"
     
@@ -24,12 +24,12 @@ def write_report(test_case, result, result_message, site_url, site_name, campaig
                 cell.value = None
 
     # Write headers
-    headers = ['Test Case', 'Result', 'Result Message', 'Site URL', 'Site Name', 'Campaign ID', 'Browser', 'Country Code', 'IP']
+    headers = ['Site URL', 'Site Name', 'Campaign ID', 'Browser', 'Country Code', 'IP Address', 'Result']
     ws.delete_rows(1, ws.max_row)  # Delete all rows before rewriting
     ws.append(headers)
 
     # Overwrite the data row
-    ws.append([test_case, result, result_message, site_url, site_name, campaign_id, browser, country_code, ip])
+    ws.append([site_url, site_name, campaign_id, browser, country_code, ip, result])
 
     # Save the workbook
     wb.save(file_name)
