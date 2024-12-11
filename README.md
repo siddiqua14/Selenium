@@ -31,27 +31,29 @@ This project automates the testing of a vacation rental details page to validate
    All test results and data scraping outputs are stored in Excel for clarity and accessibility.
 
 ## Project Structure
-Selenium/ <br>
-├── config/                     # Configuration folder<br>
-│   ├── settings.py             # Contains project settings like BASE_URL and browser settings<br>
-├── data/                       # Directory for storing Excel reports<br>
-│   ├── scraped_data_report.xlsx<br>
-│   ├── test_results.xlsx<br>
-├── tests/                      # Directory for test cases<br>
-│   ├── test_currency_filter.py # Test for currency filter functionality<br>
-│   ├── test_h1_tags.py         # Test for H1 tag existence<br>
-│   ├── test_html.py            # Test for HTML tag sequence<br>
-│   ├── test_image_alt.py       # Test for image alt attributes<br>
-│   ├── test_scrape.py          # Test for scraping script data<br>
-│   ├── test_urls.py            # Test for URL status codes<br>
-├── utils/                      # Utility functions for the project<br>
-│   ├── browser.py              # Contains methods for initializing the browser<br>
-│   ├── excel_report.py         # Functions for generating Excel reports<br>
-│   ├── report.py               # Additional report utility (if applicable)<br>
-├── .gitignore                  # Specifies files and folders to ignore in Git<br>
-├── main.py                     # Entry point to execute all tests<br>
-├── README.md                   # Documentation for the project<br>
-├── requirements.txt            # List of dependencies for the project<br>
+
+- **Selenium/**
+  - **config/**
+    - `settings.py`
+  - **data/**
+    - `scraped_data_report.xlsx`
+    - `test_results.xlsx`
+  - **tests/**
+    - `test_currency_filter.py`
+    - `test_h1_tags.py`
+    - `test_html.py`
+    - `test_image_alt.py`
+    - `test_scrape.py`
+    - `test_urls.py`
+  - **utils/**
+    - `browser.py`
+    - `excel_report.py`
+    - `report.py`
+  - `.gitignore`
+  - `main.py`
+  - `README.md`
+  - `requirements.txt`
+
 
 ## Prerequisites
 
@@ -105,7 +107,7 @@ python tests/test_currency_filter.py
 
 All configurations are managed in `config/settings.py`:
 
-- **BASE_URL**:URL of the page to test (currently set to Charming Apartment in Sevilla(https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097)).
+- **BASE_URL**:URL of the page to test (currently set to [Charming Apartment in Sevilla](https://www.alojamiento.io/property/charming-apartment-in-awesome-sevilla-with-ac-wifi/HA-61511677097)).
 
 - **BROWSER_SETTINGS**:
   - **headless**: Whether to run the browser in headless mode (True/False).
