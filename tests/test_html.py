@@ -13,9 +13,7 @@ class TestHTMLTagSequence:
         self.driver = get_driver()
 
     def run_html_tag_sequence_test(self):
-        """
-        Check for the existence and sequence of HTML tags (H1 to H6) on the given page (BASE_URL).
-        """
+
         self.driver.get(BASE_URL)
         time.sleep(2)  # Wait for the page to load completely
 
@@ -36,7 +34,6 @@ class TestHTMLTagSequence:
                 except:
                     missing_tags.append(tag)
 
-            # Preparing the result as a dictionary list
             if missing_tags or broken_sequence:
                 result = "Fail"
                 comments = f"Missing tags: {', '.join(missing_tags)}"
@@ -48,12 +45,10 @@ class TestHTMLTagSequence:
 
             results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": result, "Comments": comments}]
             
-            # Write the result to the Excel report
             write_report(test_case, BASE_URL, results)  # Passing the results as a list of dictionaries
             print(f"Test result for {BASE_URL}: {result} - {comments}")
 
         except Exception as e:
-            # Log unexpected errors in the report
             results = [{"Page URL": BASE_URL, "Test Case": test_case, "Result": "Error", "Comments": str(e)}]
             write_report(test_case, BASE_URL, results)
             print(f"Error running test: {e}")

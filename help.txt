@@ -1,4 +1,35 @@
-pip install selenium pandas openpyxl requests webdriver-manager
+
+
+-----for using firefox-----
+
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+from webdriver_manager.firefox import GeckoDriverManager
+from config.settings import BROWSER_SETTINGS
+
+def get_driver():
+    options = Options()
+    # Configure browser window size
+    options.add_argument(f"--width={BROWSER_SETTINGS['window_size'][0]}")
+    options.add_argument(f"--height={BROWSER_SETTINGS['window_size'][1]}")
+    
+    # Ensure headless is disabled
+    if not BROWSER_SETTINGS.get("headless", False):
+        options.headless = False
+    
+    # Set up the Firefox driver
+    driver = webdriver.Firefox(service=Service(GeckoDriverManager().install()), options=options)
+    return driver
+
+
+-------------------------------
+
+
+
+extra:
+
+ pip install selenium pandas openpyxl requests webdriver-manager
 
 
 
@@ -7,28 +38,3 @@ nano test_script.py
 
 python -m venv .venv
 source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-
-
-
-def write_report(test_case, result, comments, page_url):
-    file_name = "test_results.xlsx"
-
-    if os.path.exists(file_name):
-        workbook = openpyxl.load_workbook(file_name)
-    else:
-        workbook = openpyxl.Workbook()
-
-    # Remove the existing sheet for this test if it exists
-    if test_case in workbook.sheetnames:
-        del workbook[test_case]
-
-    # Create a new sheet for the test case
-    sheet = workbook.create_sheet(title=test_case)
-    # Write headers for the sheet
-    sheet.append(["Page URL", "Test Case", "Result", "Comments"])
-
-    # Write the current result
-    sheet.append([page_url, test_case, result, comments])
-
-    # Save the workbook
-    workbook.save(file_name)

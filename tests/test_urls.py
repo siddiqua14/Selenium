@@ -15,25 +15,19 @@ class TestURLStatusCode:
         self.driver = get_driver()
 
     def run_url_status_code_test(self):
-        """
-        Test to validate the status codes of all links on the page.
-        If any link returns a 404 status code, the test fails.
-        """
         self.driver.get(BASE_URL)
-        time.sleep(10)  # Wait for the page to load completely
+        time.sleep(10)  
 
         test_case = "URL status code test"
         try:
-            links = self.driver.find_elements(By.TAG_NAME, 'a')  # Find all anchor tags
-            unique_links = set()  # Use a set to store unique URLs
+            links = self.driver.find_elements(By.TAG_NAME, 'a')  
+            unique_links = set() 
 
-            # Loop through each link and add the href to the set
             for link in links:
                 href = link.get_attribute('href')
                 if href:  # Ensure the link has a valid href
                     unique_links.add(href)
 
-            # Print the total number of unique links
             print(f"Total unique links on this page: {len(unique_links)}")
 
             broken_links_count = 0

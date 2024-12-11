@@ -30,7 +30,7 @@ def write_report(test_case, page_url, results, headers=None):
         if not headers:
             headers = ["Currency", "Default Price", "Tile Prices", "Status"]
     else:
-        # For other tests (H1 tag, HTML validation, etc.), use a default header
+        # For other tests, use a default header
         if not headers:
             headers = ["Page URL", "Test Case", "Result", "Comments"]
 

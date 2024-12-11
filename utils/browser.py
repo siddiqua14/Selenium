@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from config.settings import BROWSER_SETTINGS
+# To use firefox driver imports are in help.txt
 
 def get_driver():
     options = Options()

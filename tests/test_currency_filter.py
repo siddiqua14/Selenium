@@ -17,9 +17,6 @@ class TestCurrencyFilter:
         self.driver = get_driver()
 
     def run_currency_filter_test(self):
-        """
-        Test that changing the currency updates the property tiles' currency display.
-        """
         self.driver.get(BASE_URL)
         time.sleep(2)  # Wait for the page to load completely
 
